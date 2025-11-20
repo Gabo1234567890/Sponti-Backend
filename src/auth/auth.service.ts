@@ -31,12 +31,17 @@ export class AuthService {
     return await argon2.verify(hash, plain);
   }
 
-  async signup(email: string, password: string) {
-    const existing = await this.usersRepo.findOne({ where: { email } });
-    if (existing) throw new BadRequestException('Email already in use');
+  async signup(username: string, email: string, password: string) {
+    const existingEmail = await this.usersRepo.findOne({ where: { email } });
+    if (existingEmail) throw new BadRequestException('Email already in use');
+    const existingUsername = await this.usersRepo.findOne({
+      where: { username },
+    });
+    if (existingUsername)
+      throw new BadRequestException('Username already taken');
 
     const hashed = await this.hash(password);
-    const user = this.usersRepo.create({ email, password: hashed });
+    const user = this.usersRepo.create({ username, email, password: hashed });
     return this.usersRepo.save(user);
   }
 
