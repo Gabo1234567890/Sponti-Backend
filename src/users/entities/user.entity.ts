@@ -21,6 +21,9 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ default: false })
+  emailVerified: boolean;
+
   @Column({ default: 'user' })
   role: string;
 
