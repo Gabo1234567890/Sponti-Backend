@@ -41,8 +41,50 @@ export class AuthService {
       throw new BadRequestException('Username already taken');
 
     const hashed = await this.hash(password);
-    const user = this.usersRepo.create({ username, email, password: hashed });
-    return this.usersRepo.save(user);
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const hashedVerificationToken = await this.hash(token);
+
+    const user = this.usersRepo.create({
+      username,
+      email,
+      password: hashed,
+      emailVerificationToken: hashedVerificationToken,
+      emailVerificationExpires: new Date(Date.now() + 1000 * 60 * 60),
+    });
+    await this.usersRepo.save(user);
+
+    const verifyUrl = `${this.config.get('FRONTEND_VERIFY_EMAIL_URL')}?token=${token}&email=${encodeURIComponent(email)}`;
+
+    await this.mailService.sendVerificationEmail(email, verifyUrl);
+
+    return user;
+  }
+
+  async verifyEmail(email: string, token: string) {
+    const user = await this.usersRepo.findOne({ where: { email } });
+
+    if (!user) throw new BadRequestException('User not found');
+
+    if (user.emailVerified)
+      throw new BadRequestException('Email already verified');
+
+    if (!user.emailVerificationToken || !user.emailVerificationExpires)
+      throw new BadRequestException('Invalid verification request');
+
+    if (user.emailVerificationExpires.getTime() < Date.now())
+      throw new BadRequestException('Verification token expired');
+
+    const matches = await this.compare(user.emailVerificationToken, token);
+    if (!matches) throw new BadRequestException('Invalid token');
+
+    user.emailVerified = true;
+    user.emailVerificationToken = null;
+    user.emailVerificationExpires = null;
+
+    await this.usersRepo.save(user);
+
+    return { message: 'Email successfully verified' };
   }
 
   async validateUser(email: string, password: string) {

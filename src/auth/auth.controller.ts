@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
@@ -32,11 +25,11 @@ export class AuthController {
   }
 
   @Post('login')
-  @HttpCode(200)
   @ApiOperation({ summary: 'Login' })
   async login(@Body() dto: LoginDto) {
     const user = await this.authService.validateUser(dto.email, dto.password);
     if (!user) throw new Error('Invalid Credentials');
+    if (!user.emailVerified) throw new Error('Email not verified');
     return this.authService.login(user);
   }
 
@@ -69,5 +62,11 @@ export class AuthController {
       dto.token,
       dto.password,
     );
+  }
+
+  @Post('verify-email')
+  @ApiOperation({ summary: 'Verify user email' })
+  async verifyEmail(@Body() body: { email: string; token: string }) {
+    return this.authService.verifyEmail(body.email, body.token);
   }
 }
