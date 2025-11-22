@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
@@ -7,6 +15,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResetPasswordRequestDto } from './dto/reset-password.request.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -64,9 +73,10 @@ export class AuthController {
     );
   }
 
-  @Post('verify-email')
+  @Get('verify-email')
   @ApiOperation({ summary: 'Verify user email' })
-  async verifyEmail(@Body() body: { email: string; token: string }) {
-    return this.authService.verifyEmail(body.email, body.token);
+  async verifyEmail(@Query() query: VerifyEmailDto) {
+    const { email, token } = query;
+    return this.authService.verifyEmail(email, token);
   }
 }

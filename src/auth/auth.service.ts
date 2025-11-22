@@ -50,7 +50,7 @@ export class AuthService {
       email,
       password: hashed,
       emailVerificationToken: hashedVerificationToken,
-      emailVerificationExpires: new Date(Date.now() + 1000 * 60 * 60),
+      emailVerificationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24),
     });
     await this.usersRepo.save(user);
 
