@@ -97,7 +97,10 @@ export class AuthService {
 
   async login(user: User) {
     const payload = { sub: user.id, email: user.email };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+      expiresIn: this.config.get('JWT_ACCESS_EXPIRATION'),
+    });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.config.get('JWT_REFRESH_TOKEN_SECRET'),
@@ -119,7 +122,10 @@ export class AuthService {
     if (!isMatch) throw new UnauthorizedException();
 
     const payload = { sub: user.id, email: user.email };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+      expiresIn: this.config.get('JWT_ACCESS_EXPIRATION'),
+    });
     const newRefresh = this.jwtService.sign(payload, {
       secret: this.config.get('JWT_REFRESH_TOKEN_SECRET'),
       expiresIn: this.config.get('JWT_REFRESH_EXPIRATION'),
@@ -155,7 +161,8 @@ export class AuthService {
 
   async resetPassword(email: string, token: string, newPassword: string) {
     const user = await this.usersRepo.findOne({ where: { email } });
-    if (!user || !user.resetPasswordToken || !user.resetPasswordExpires)
+    if (!user) throw new BadRequestException('User not found');
+    if (!user.resetPasswordToken || !user.resetPasswordExpires)
       throw new BadRequestException('Invalid or expired token');
     if (user.resetPasswordExpires.getTime() < Date.now())
       throw new BadRequestException('Expired token');

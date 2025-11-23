@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -13,9 +14,10 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResetPasswordQueryDto } from './dto/reset-password-query.dto';
 import { ResetPasswordRequestDto } from './dto/reset-password.request.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { ResetPasswordBodyDto } from './dto/reset-password-body.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -37,12 +39,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Login' })
   async login(@Body() dto: LoginDto) {
     const user = await this.authService.validateUser(dto.email, dto.password);
-    if (!user) throw new Error('Invalid Credentials');
-    if (!user.emailVerified) throw new Error('Email not verified');
+    if (!user) throw new BadRequestException('Invalid Credentials');
+    if (!user.emailVerified)
+      throw new BadRequestException('Email not verified');
     return this.authService.login(user);
   }
 
   @Post('refresh')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Rotate refresh token' })
   async refresh(@Body() dto: RefreshTokenDto) {
     const payload = this.authService['jwtService'].verify(dto.refreshToken, {
@@ -65,18 +69,20 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  async reset(@Body() dto: ResetPasswordDto) {
+  async reset(
+    @Query() query: ResetPasswordQueryDto,
+    @Body() body: ResetPasswordBodyDto,
+  ) {
     return this.authService.resetPassword(
-      dto['email'],
-      dto.token,
-      dto.password,
+      query.email,
+      query.token,
+      body.password,
     );
   }
 
   @Get('verify-email')
   @ApiOperation({ summary: 'Verify user email' })
   async verifyEmail(@Query() query: VerifyEmailDto) {
-    const { email, token } = query;
-    return this.authService.verifyEmail(email, token);
+    return this.authService.verifyEmail(query.email, query.token);
   }
 }

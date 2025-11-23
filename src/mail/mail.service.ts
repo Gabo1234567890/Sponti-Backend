@@ -22,7 +22,6 @@ export class MailService {
       from: this.config.get('SMTP_USER'),
       to,
       subject: 'Sponti - Password Reset',
-      text: `Reset your password: ${resetUrl}`,
       html: `<p>Click <a href="${resetUrl}">here</a> to reset your password.</p>`,
     });
     return info;
