@@ -36,5 +36,6 @@ export class MailService {
       <p>Please verify your email by clicking below:</p>
       <p><a href="${verifyUrl}">Verify Email</a></p>`,
     });
+    return info;
   }
 }

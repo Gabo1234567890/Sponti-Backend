@@ -64,16 +64,16 @@ export class AuthService {
   async verifyEmail(email: string, token: string) {
     const user = await this.usersRepo.findOne({ where: { email } });
 
-    if (!user) throw new BadRequestException('User not found');
+    if (!user) throw new NotFoundException('User not found');
 
     if (user.emailVerified)
       throw new BadRequestException('Email already verified');
 
     if (!user.emailVerificationToken || !user.emailVerificationExpires)
-      throw new BadRequestException('Invalid verification request');
+      throw new BadRequestException('Invalid token');
 
     if (user.emailVerificationExpires.getTime() < Date.now())
-      throw new BadRequestException('Verification token expired');
+      throw new BadRequestException('Expired token');
 
     const matches = await this.compare(user.emailVerificationToken, token);
     if (!matches) throw new BadRequestException('Invalid token');
@@ -116,10 +116,12 @@ export class AuthService {
 
   async refreshTokens(userId: UUID, refreshToken: string) {
     const user = await this.usersRepo.findOne({ where: { id: userId } });
-    if (!user || !user.hashedRefreshToken) throw new UnauthorizedException();
+    if (!user) throw new NotFoundException('User not found');
+
+    if (!user.hashedRefreshToken) throw new UnauthorizedException();
 
     const isMatch = await this.compare(user.hashedRefreshToken, refreshToken);
-    if (!isMatch) throw new UnauthorizedException();
+    if (!isMatch) throw new BadRequestException('Invalid token');
 
     const payload = { sub: user.id, email: user.email };
     const accessToken = this.jwtService.sign(payload, {
@@ -138,14 +140,14 @@ export class AuthService {
 
   async logout(userId: UUID) {
     const user = await this.usersRepo.findOne({ where: { id: userId } });
-    if (!user) return;
+    if (!user) throw new NotFoundException('User not found');
     user.hashedRefreshToken = null;
     await this.usersRepo.save(user);
   }
 
   async requestPasswordReset(email: string) {
     const user = await this.usersRepo.findOne({ where: { email } });
-    if (!user) throw new NotFoundException('No user with that email');
+    if (!user) throw new NotFoundException('User not found');
 
     const token = crypto.randomBytes(32).toString('hex');
     const hashed = await this.hash(token);
@@ -161,9 +163,9 @@ export class AuthService {
 
   async resetPassword(email: string, token: string, newPassword: string) {
     const user = await this.usersRepo.findOne({ where: { email } });
-    if (!user) throw new BadRequestException('User not found');
+    if (!user) throw new NotFoundException('User not found');
     if (!user.resetPasswordToken || !user.resetPasswordExpires)
-      throw new BadRequestException('Invalid or expired token');
+      throw new BadRequestException('Invalid token');
     if (user.resetPasswordExpires.getTime() < Date.now())
       throw new BadRequestException('Expired token');
 

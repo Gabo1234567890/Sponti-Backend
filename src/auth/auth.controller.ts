@@ -35,6 +35,12 @@ export class AuthController {
     return { id: user.id, email: user.email };
   }
 
+  @Get('verify-email')
+  @ApiOperation({ summary: 'Verify user email' })
+  async verifyEmail(@Query() query: VerifyEmailDto) {
+    return this.authService.verifyEmail(query.email, query.token);
+  }
+
   @Post('login')
   @ApiOperation({ summary: 'Login' })
   async login(@Body() dto: LoginDto) {
@@ -57,6 +63,7 @@ export class AuthController {
 
   @Post('logout')
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Logout' })
   @UseGuards(JwtAuthGuard)
   async logout(@Req() req: any) {
     await this.authService.logout(req.user.userId);
@@ -64,11 +71,13 @@ export class AuthController {
   }
 
   @Post('request-password-reset')
+  @ApiOperation({ summary: 'Request to be sent an email for password reset' })
   async requestReset(@Body() dto: ResetPasswordRequestDto) {
     return this.authService.requestPasswordReset(dto.email);
   }
 
   @Post('reset-password')
+  @ApiOperation({ summary: 'Set a new password to your account' })
   async reset(
     @Query() query: ResetPasswordQueryDto,
     @Body() body: ResetPasswordBodyDto,
@@ -78,11 +87,5 @@ export class AuthController {
       query.token,
       body.password,
     );
-  }
-
-  @Get('verify-email')
-  @ApiOperation({ summary: 'Verify user email' })
-  async verifyEmail(@Query() query: VerifyEmailDto) {
-    return this.authService.verifyEmail(query.email, query.token);
   }
 }
