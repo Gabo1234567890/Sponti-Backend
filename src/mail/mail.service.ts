@@ -22,8 +22,19 @@ export class MailService {
       from: this.config.get('SMTP_USER'),
       to,
       subject: 'Sponti - Password Reset',
-      text: `Reset your password: ${resetUrl}`,
       html: `<p>Click <a href="${resetUrl}">here</a> to reset your password.</p>`,
+    });
+    return info;
+  }
+
+  async sendVerificationEmail(to: string, verifyUrl: string) {
+    const info = await this.transporter.sendMail({
+      from: this.config.get('SMTP_USER'),
+      to,
+      subject: 'Sponti - Verify Your Email',
+      html: `<p>Thank you for registering on Sponti!</p>
+      <p>Please verify your email by clicking below:</p>
+      <p><a href="${verifyUrl}">Verify Email</a></p>`,
     });
     return info;
   }

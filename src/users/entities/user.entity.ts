@@ -21,13 +21,22 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ type: 'text', nullable: true })
+  emailVerificationToken?: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  emailVerificationExpires?: Date | null;
+
+  @Column({ default: false })
+  emailVerified: boolean;
+
   @Column({ default: 'user' })
   role: string;
 
-  @Column({ name: 'refresh_token', nullable: true })
+  @Column({ type: 'text', name: 'refresh_token', nullable: true })
   hashedRefreshToken?: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   resetPasswordToken?: string | null;
 
   @Column({ type: 'timestamptz', nullable: true })
