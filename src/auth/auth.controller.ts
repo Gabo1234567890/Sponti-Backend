@@ -13,7 +13,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../utils/guards/jwt-auth.guard';
 import { ResetPasswordQueryDto } from './dto/reset-password-query.dto';
 import { ResetPasswordRequestDto } from './dto/reset-password.request.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
