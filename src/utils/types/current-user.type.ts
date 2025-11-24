@@ -1,6 +1,6 @@
 import { UUID } from 'crypto';
 
-export type JwtPayloadUser = {
+export type CurrentUserType = {
   userId: UUID;
   email: string;
 };
