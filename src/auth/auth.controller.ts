@@ -18,6 +18,8 @@ import { ResetPasswordQueryDto } from './dto/reset-password-query.dto';
 import { ResetPasswordRequestDto } from './dto/reset-password.request.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResetPasswordBodyDto } from './dto/reset-password-body.dto';
+import { CurrentUser } from 'src/utils/decorators/current-user.decorator';
+import type { JwtPayloadUser } from './types/jwt-payload-user.type';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -65,8 +67,8 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout' })
   @UseGuards(JwtAuthGuard)
-  async logout(@Req() req: any) {
-    await this.authService.logout(req.user.userId);
+  async logout(@CurrentUser() user: JwtPayloadUser) {
+    await this.authService.logout(user.userId);
     return { message: 'Logged out' };
   }
 
