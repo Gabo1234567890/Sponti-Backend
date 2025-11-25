@@ -30,6 +30,9 @@ export class User {
   @Column({ default: false })
   emailVerified: boolean;
 
+  @Column({ default: false })
+  allowPublicImages: boolean;
+
   @Column({ default: 'user' })
   role: string;
 
