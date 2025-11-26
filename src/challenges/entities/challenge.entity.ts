@@ -11,7 +11,7 @@ export type Vehicle = 'car' | 'walking' | 'plane' | 'train' | 'bicycle';
 export type PlaceType = 'indoor' | 'outdoor' | 'anywhere';
 
 @Entity('challenges')
-export class challenges {
+export class Challenge {
   @PrimaryGeneratedColumn('uuid')
   id: UUID;
 
@@ -22,13 +22,13 @@ export class challenges {
   description: string;
 
   @Column({ nullable: true })
-  tumbnailUrl: string;
+  thumbnailUrl: string;
 
   @Column({ default: 0 })
   price: number;
 
-  @Column({ type: 'varchar', length: 5, comment: 'hh:mm' })
-  duration: string;
+  @Column()
+  durationMinutes: number;
 
   @Column({ length: 20 })
   place: string;

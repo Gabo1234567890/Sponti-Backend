@@ -6,9 +6,9 @@ import {
   Min,
   Max,
   MaxLength,
-  Matches,
   IsIn,
 } from 'class-validator';
+import type { PlaceType, Vehicle } from '../entities/challenge.entity';
 
 export class CreateChallengeDto {
   @ApiProperty({ maxLength: 25 })
@@ -24,7 +24,7 @@ export class CreateChallengeDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  tumbnailUrl?: string;
+  thumbnailUrl?: string;
 
   @ApiProperty({ example: 0 })
   @IsInt()
@@ -32,9 +32,9 @@ export class CreateChallengeDto {
   @Max(999)
   price: number;
 
-  @ApiProperty({ example: '01:30' })
-  @Matches(/^\d{2}:\d{2}$/, { message: 'duration must be HH:MM' })
-  duration: string;
+  @ApiProperty({ description: 'Time duration in minutes' })
+  @IsInt()
+  durationMinutes: number;
 
   @ApiProperty({ example: 'park', maxLength: 20 })
   @IsString()
@@ -43,9 +43,9 @@ export class CreateChallengeDto {
 
   @ApiProperty({ enum: ['car', 'walking', 'plane', 'train', 'bicycle'] })
   @IsIn(['car', 'walking', 'plane', 'train', 'bicycle'])
-  vehicle: string;
+  vehicle: Vehicle;
 
   @ApiProperty({ enum: ['indoor', 'outdoor', 'anywhere'] })
   @IsIn(['indoor', 'outdoor', 'anywhere'])
-  placeType: string;
+  placeType: PlaceType;
 }
