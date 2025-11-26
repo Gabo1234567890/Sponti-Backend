@@ -30,7 +30,7 @@ export class challenges {
   @Column({ type: 'varchar', length: 5, comment: 'hh:mm' })
   duration: string;
 
-  @Column()
+  @Column({ length: 20 })
   place: string;
 
   @Column({ type: 'varchar', length: 10 })
