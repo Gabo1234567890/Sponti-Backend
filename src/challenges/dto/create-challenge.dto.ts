@@ -6,9 +6,9 @@ import {
   Min,
   Max,
   MaxLength,
-  IsIn,
+  IsEnum,
 } from 'class-validator';
-import type { PlaceType, Vehicle } from '../entities/challenge.entity';
+import { PlaceType, Vehicle } from '../entities/challenge.entity';
 
 export class CreateChallengeDto {
   @ApiProperty({ maxLength: 25 })
@@ -42,10 +42,10 @@ export class CreateChallengeDto {
   place: string;
 
   @ApiProperty({ enum: ['car', 'walking', 'plane', 'train', 'bicycle'] })
-  @IsIn(['car', 'walking', 'plane', 'train', 'bicycle'])
+  @IsEnum(Vehicle)
   vehicle: Vehicle;
 
   @ApiProperty({ enum: ['indoor', 'outdoor', 'anywhere'] })
-  @IsIn(['indoor', 'outdoor', 'anywhere'])
+  @IsEnum(PlaceType)
   placeType: PlaceType;
 }

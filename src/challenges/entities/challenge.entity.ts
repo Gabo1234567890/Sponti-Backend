@@ -7,8 +7,19 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-export type Vehicle = 'car' | 'walking' | 'plane' | 'train' | 'bicycle';
-export type PlaceType = 'indoor' | 'outdoor' | 'anywhere';
+export enum Vehicle {
+  CAR = 'car',
+  WALKING = 'walking',
+  PLANE = 'plane',
+  TRAIN = 'train',
+  BICYCLE = 'bicycle',
+}
+
+export enum PlaceType {
+  INDOOR = 'indoor',
+  OUTDOOR = 'outdoor',
+  ANYWHERE = 'anywhere',
+}
 
 @Entity('challenges')
 export class Challenge {
