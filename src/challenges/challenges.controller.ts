@@ -17,6 +17,7 @@ import { CurrentUser } from 'src/utils/decorators/current-user.decorator';
 import type { CurrentUserType } from 'src/utils/types/current-user.type';
 import type { UUID } from 'crypto';
 import { ListChallengesQueryDto } from './dto/list-challenges-query.dto';
+import { AdminGuard } from 'src/utils/guards/admin.guard';
 
 @ApiTags('challenges')
 @Controller('challenges')
@@ -52,14 +53,14 @@ export class ChallengesController {
   }
 
   @Patch(':id/approve')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   async approve(@Param('id') id: UUID) {
     return this.challengesService.approve(id);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   async delete(@Param('id') id: UUID) {
     return this.challengesService.delete(id);

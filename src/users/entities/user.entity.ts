@@ -34,7 +34,7 @@ export class User {
   allowPublicImages: boolean;
 
   @Column({ default: 'user' })
-  role: string;
+  role: 'user' | 'admin';
 
   @Column({ type: 'text', name: 'refresh_token', nullable: true })
   hashedRefreshToken?: string | null;
