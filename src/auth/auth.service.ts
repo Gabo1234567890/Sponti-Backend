@@ -96,7 +96,7 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload, {
       secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'),
       expiresIn: this.config.get('JWT_ACCESS_EXPIRATION'),
@@ -123,7 +123,7 @@ export class AuthService {
     const isMatch = await this.compare(user.hashedRefreshToken, refreshToken);
     if (!isMatch) throw new BadRequestException('Invalid token');
 
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload, {
       secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'),
       expiresIn: this.config.get('JWT_ACCESS_EXPIRATION'),
