@@ -18,7 +18,7 @@ export class Participation {
   @Column()
   challengeId: UUID;
 
-  @Column({ default: 'active' })
+  @Column({ default: 'inactive' })
   status: 'active' | 'inactive' | 'completed';
 
   @Column({ type: 'timestamptz', nullable: true })
