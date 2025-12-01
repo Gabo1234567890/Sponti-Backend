@@ -25,6 +25,15 @@ export class ParticipationsController {
   @Post('start')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        challengeId: { type: 'string' },
+      },
+      required: ['challengeId'],
+    },
+  })
   async start(
     @CurrentUser() user: CurrentUserType,
     @Body() body: { challengeId: UUID },
@@ -62,7 +71,9 @@ export class ParticipationsController {
           type: 'array',
           items: { type: 'string', format: 'binary' },
         },
+        challengeId: { type: 'string' },
       },
+      required: ['challengeId', 'images'],
     },
   })
   async addImages(
@@ -72,7 +83,7 @@ export class ParticipationsController {
     @Body() body: { challengeId: UUID },
   ) {
     const images = files.map((f) => ({
-      url: f.filename,
+      url: f.originalname,
     }));
 
     return this.participationsService.addCompletionImages(

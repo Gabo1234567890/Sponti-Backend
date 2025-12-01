@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ChallengesModule } from './challenges/challenges.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { ParticipationsModule } from './participations/participations.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { diskStorage } from 'multer';
     MailModule,
     AuthModule,
     ChallengesModule,
+    ParticipationsModule,
   ],
 })
 export class AppModule {}
