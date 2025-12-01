@@ -10,7 +10,7 @@ import { CompletionImage } from './entities/completion-image.entity';
 import { UUID } from 'crypto';
 
 const MAX_ACTIVE_CHALLENGES = 5;
-const MAX_IMAGES_ON_COMPLETION = 5;
+const MAX_IMAGES_ON_COMPLETION = 3;
 
 @Injectable()
 export class ParticipationsService {
@@ -23,7 +23,7 @@ export class ParticipationsService {
 
   async startChallenge(userId: UUID, challengeId: UUID) {
     const activeCount = await this.participationRepo.count({
-      where: { userId, status: 'active' },
+      where: { userId, isActive: true },
     });
 
     if (activeCount >= MAX_ACTIVE_CHALLENGES)
@@ -31,45 +31,52 @@ export class ParticipationsService {
         `Max ${MAX_ACTIVE_CHALLENGES} active challenges allowed`,
       );
 
-    const existing = await this.participationRepo.findOne({
-      where: { userId, challengeId, status: 'active' },
-    });
-    if (existing) throw new BadRequestException('Challenge already active');
-
-    const p = this.participationRepo.create({
-      userId,
-      challengeId,
-      status: 'active',
-      startedAt: new Date(),
+    const p = await this.participationRepo.findOne({
+      where: { userId, challengeId },
     });
 
+    if (!p) {
+      const newP = this.participationRepo.create({
+        userId,
+        challengeId,
+        isActive: true,
+        startedAt: new Date(),
+        completionCount: 0,
+      });
+
+      return this.participationRepo.save(newP);
+    }
+
+    if (p.isActive) throw new BadRequestException('Challenge already active');
+
+    p.isActive = true;
+    p.startedAt = new Date();
     return this.participationRepo.save(p);
   }
 
-  async cancelChallenge(userId: UUID, participationId: UUID) {
+  async cancelChallenge(userId: UUID, challengeId: UUID) {
     const p = await this.participationRepo.findOne({
-      where: { id: participationId, userId },
+      where: { challengeId, userId },
     });
 
     if (!p) throw new NotFoundException('Participation not found');
-    if (p.status !== 'active')
+    if (!p.isActive)
       throw new BadRequestException('Cannot cancel non-active challenge');
 
-    p.status = 'inactive';
+    p.isActive = false;
     return this.participationRepo.save(p);
   }
 
-  async completeChallenge(userId: UUID, participationId: UUID) {
+  async completeChallenge(userId: UUID, challengeId: UUID) {
     const p = await this.participationRepo.findOne({
-      where: { id: participationId, userId },
+      where: { challengeId, userId },
     });
 
     if (!p) throw new NotFoundException('Participation not found');
-    if (p.status !== 'active')
+    if (!p.isActive)
       throw new BadRequestException('Cannot complete non-active challenge');
 
-    p.status = 'completed';
-    p.completedAt = new Date();
+    p.isActive = false;
     p.completionCount = (p.completionCount || 0) + 1;
 
     return this.participationRepo.save(p);
@@ -77,22 +84,17 @@ export class ParticipationsService {
 
   async addCompletionImages(
     userId: UUID,
-    participationId: UUID,
     challengeId: UUID,
-    images: { url: string }[],
+    images: Express.Multer.File[],
   ) {
-    const currentCount = await this.imgRepo.count({
-      where: { participationId },
-    });
-    if (currentCount + images.length > MAX_IMAGES_ON_COMPLETION)
+    if (images.length > MAX_IMAGES_ON_COMPLETION)
       throw new BadRequestException('Image cap exceeded');
 
     const entities = images.map((img) =>
       this.imgRepo.create({
-        participationId,
         userId,
         challengeId,
-        url: img.url,
+        url: img.filename,
         uploadedAt: new Date(),
       }),
     );
@@ -101,19 +103,24 @@ export class ParticipationsService {
   }
 
   async getUserActiveParticipations(userId: UUID) {
-    return this.participationRepo.find({ where: { userId, status: 'active' } });
+    return this.participationRepo.find({ where: { userId, isActive: true } });
   }
 
   async getUserAllCompletedCount(userId: UUID) {
-    return this.participationRepo.count({
-      where: { userId, status: 'completed' },
+    const participations = await this.participationRepo.find({
+      where: { userId },
     });
+
+    const completions = participations.map((p) => p.completionCount);
+
+    return completions.reduce((prev, curr) => prev + curr, 0);
   }
 
-  async getUserCompletedCount(userId: UUID, participationId: UUID) {
+  async getUserCompletedCount(userId: UUID, challengeId: UUID) {
     const p = await this.participationRepo.findOne({
-      where: { userId, id: participationId },
+      where: { userId, challengeId },
     });
+
     if (!p) throw new NotFoundException('Participation not found');
 
     return p.completionCount;

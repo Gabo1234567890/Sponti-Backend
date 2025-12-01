@@ -7,9 +7,6 @@ export class CompletionImage {
   id: UUID;
 
   @Column()
-  participationId: UUID;
-
-  @Column()
   userId: UUID;
 
   @Column()

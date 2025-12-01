@@ -6,8 +6,6 @@ import { UsersModule } from './users/users.module';
 import { MailModule } from './mail/mail.module';
 import { AuthModule } from './auth/auth.module';
 import { ChallengesModule } from './challenges/challenges.module';
-import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { ParticipationsModule } from './participations/participations.module';
 
 @Module({
@@ -30,15 +28,6 @@ import { ParticipationsModule } from './participations/participations.module';
         synchronize: true, //Only in development
       }),
       inject: [ConfigService],
-    }),
-    MulterModule.register({
-      storage: diskStorage({
-        destination: './uploads/completions',
-        filename: (_req, file, cb) => {
-          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, unique + '-' + file.originalname);
-        },
-      }),
     }),
     UsersModule,
     MailModule,

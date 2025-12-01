@@ -3,32 +3,26 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('participations')
 export class Participation {
-  @PrimaryGeneratedColumn('uuid')
-  id: UUID;
-
-  @Column()
+  @PrimaryColumn('uuid')
   userId: UUID;
 
-  @Column()
+  @PrimaryColumn('uuid')
   challengeId: UUID;
 
-  @Column({ default: 'inactive' })
-  status: 'active' | 'inactive' | 'completed';
+  @Column({ default: false })
+  isActive: boolean;
 
   @Column({ type: 'timestamptz', nullable: true })
   startedAt?: Date;
 
-  @Column({ type: 'timestamptz', nullable: true })
-  completedAt?: Date;
-
   @Column({ default: 0 })
-  completionCount?: number;
+  completionCount: number;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
