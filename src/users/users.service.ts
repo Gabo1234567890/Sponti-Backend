@@ -8,6 +8,7 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { UUID } from 'crypto';
 import type { UserProfileResponse } from './types/profile-response.type';
+import { CompletionImage } from 'src/participations/entities/completion-image.entity';
 
 @Injectable()
 export class UsersService {
@@ -68,5 +69,25 @@ export class UsersService {
   async deleteAccount(userId: UUID) {
     const user = await this.findById(userId);
     await this.repo.remove(user);
+  }
+
+  async getUserMemories(userId: UUID, page = 1, perPage = 10) {
+    const qb = this.repo.manager
+      .getRepository(CompletionImage)
+      .createQueryBuilder('img')
+      .innerJoin('challenges', 'chal', 'chal.id = img.challengeId')
+      .where('img.userId = :userId', { userId })
+      .orderBy('img.uploadedAt', 'DESC')
+      .skip((page - 1) * perPage)
+      .take(perPage)
+      .select([
+        'img.url AS imageUrl',
+        'img.uploadedAt AS uploadedAt',
+        'chal.id AS challengeId',
+        'chal.title AS challengeTitle',
+      ]);
+
+    const items = await qb.getRawMany();
+    return { items, page, perPage };
   }
 }
