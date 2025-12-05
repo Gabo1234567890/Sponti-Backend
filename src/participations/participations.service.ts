@@ -125,4 +125,32 @@ export class ParticipationsService {
 
     return p.completionCount;
   }
+
+  async getPublicCompletionImages(challengeId: UUID, page = 1, perPage = 10) {
+    const qb = this.imgRepo
+      .createQueryBuilder('img')
+      .innerJoin('users', 'u', 'u.id = img.userId')
+      .where('img.challengeId = :challengeId', { challengeId })
+      .andWhere('u.allowPublicImages = true')
+      .orderBy('img.uploadedAt', 'DESC')
+      .select([
+        'img.userId AS userId',
+        'img.url AS url',
+        'img.uploadedAt AS uploadedAt',
+      ]);
+
+    const allImages = await qb.getRawMany();
+
+    const unique = new Map();
+    for (const img of allImages) {
+      if (!unique.has(img.userId)) {
+        unique.set(img.userId, img);
+      }
+    }
+
+    const items = Array.from(unique.values());
+    const paginated = items.slice((page - 1) * page * perPage);
+
+    return { items: paginated, page, perPage };
+  }
 }
