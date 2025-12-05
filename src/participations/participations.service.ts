@@ -8,9 +8,7 @@ import { Participation } from './entities/participation.entity';
 import { Repository } from 'typeorm';
 import { CompletionImage } from './entities/completion-image.entity';
 import { UUID } from 'crypto';
-
-const MAX_ACTIVE_CHALLENGES = 5;
-const MAX_IMAGES_ON_COMPLETION = 3;
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ParticipationsService {
@@ -19,6 +17,7 @@ export class ParticipationsService {
     private participationRepo: Repository<Participation>,
     @InjectRepository(CompletionImage)
     private imgRepo: Repository<CompletionImage>,
+    private config: ConfigService,
   ) {}
 
   async startChallenge(userId: UUID, challengeId: UUID) {
@@ -26,9 +25,9 @@ export class ParticipationsService {
       where: { userId, isActive: true },
     });
 
-    if (activeCount >= MAX_ACTIVE_CHALLENGES)
+    if (activeCount >= this.config.get('MAX_ACTIVE_CHALLENGES'))
       throw new BadRequestException(
-        `Max ${MAX_ACTIVE_CHALLENGES} active challenges allowed`,
+        `Max ${this.config.get('MAX_ACTIVE_CHALLENGES')} active challenges allowed`,
       );
 
     const p = await this.participationRepo.findOne({
@@ -87,7 +86,7 @@ export class ParticipationsService {
     challengeId: UUID,
     images: Express.Multer.File[],
   ) {
-    if (images.length > MAX_IMAGES_ON_COMPLETION)
+    if (images.length > this.config.get('MAX_IMAGES_ON_COMPLETION'))
       throw new BadRequestException('Image cap exceeded');
 
     const entities = images.map((img) =>
