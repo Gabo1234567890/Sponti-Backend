@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -123,6 +124,21 @@ export class ParticipationsController {
     return this.participationsService.getUserCompletedCount(
       user.userId,
       challengeId,
+    );
+  }
+
+  @Get(':challengeId/public-images')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async publicImages(
+    @Param('challengeId') challengeId: UUID,
+    @Query('page') page = 1,
+    @Query('perPage') perPage = 10,
+  ) {
+    return this.participationsService.getPublicCompletionImages(
+      challengeId,
+      +page,
+      +perPage,
     );
   }
 }

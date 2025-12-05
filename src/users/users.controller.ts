@@ -5,6 +5,7 @@ import {
   UseGuards,
   Body,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -41,5 +42,16 @@ export class UsersController {
   async deleteMe(@CurrentUser() user: CurrentUserType) {
     await this.usersService.deleteAccount(user.userId);
     return { message: 'Account delted' };
+  }
+
+  @Get('memories')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getMemories(
+    @CurrentUser() user: CurrentUserType,
+    @Query('page') page = 1,
+    @Query('perPage') perPage = 10,
+  ) {
+    return this.usersService.getUserMemories(user.userId, +page, +perPage);
   }
 }

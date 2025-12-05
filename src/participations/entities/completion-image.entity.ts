@@ -6,10 +6,10 @@ export class CompletionImage {
   @PrimaryGeneratedColumn('uuid')
   id: UUID;
 
-  @Column()
+  @Column({ type: 'uuid' })
   userId: UUID;
 
-  @Column()
+  @Column({ type: 'uuid' })
   challengeId: UUID;
 
   @Column()
