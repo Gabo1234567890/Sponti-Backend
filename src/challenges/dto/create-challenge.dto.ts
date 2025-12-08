@@ -9,6 +9,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { PlaceType, Vehicle } from '../entities/challenge.entity';
+import { Type } from 'class-transformer';
 
 export class CreateChallengeDto {
   @ApiProperty({ maxLength: 25 })
@@ -21,19 +22,16 @@ export class CreateChallengeDto {
   @MaxLength(500)
   description: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  thumbnailUrl?: string;
-
   @ApiProperty({ example: 0 })
   @IsInt()
   @Min(0)
   @Max(999)
+  @Type(() => Number)
   price: number;
 
   @ApiProperty({ description: 'Time duration in minutes' })
   @IsInt()
+  @Type(() => Number)
   durationMinutes: number;
 
   @ApiProperty({ example: 'park', maxLength: 20 })

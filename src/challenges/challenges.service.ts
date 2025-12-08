@@ -16,10 +16,15 @@ export class ChallengesService {
     @InjectRepository(Challenge) private repo: Repository<Challenge>,
   ) {}
 
-  async submitChallenge(dto: CreateChallengeDto, userId: UUID) {
+  async submitChallenge(
+    dto: CreateChallengeDto,
+    userId: UUID,
+    tumbnail: Express.Multer.File,
+  ) {
     const challenge = this.repo.create({
       ...dto,
       submittedByUserId: userId,
+      thumbnailUrl: tumbnail.filename,
       approved: false,
     });
     return this.repo.save(challenge);
